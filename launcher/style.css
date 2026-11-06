@@ -1,0 +1,115 @@
+/* Estilo Apple TV, pensado para ir rápido en Tizen 5.5 (Chromium ~69):
+   sin degradados grandes calculados, sin sombras salvo en la tarjeta enfocada,
+   y solo se animan transform y opacity (van por GPU). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: #070812;
+  color: #fff;
+  font-family: "SamsungOneUI", "SamsungOne", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Escenario fijo de 1920x1080 que se escala con JS para llenar la pantalla real de la TV. */
+#stage {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden;
+  -webkit-transform-origin: 0 0; transform-origin: 0 0;
+}
+
+/* Brillo de color: imagen de 160x120 que la GPU amplía a 1700x1300 con transform.
+   Solo se pinta la imagen pequeña; el fundido es de opacidad (sin repintar). */
+.glow {
+  position: absolute; top: -260px; left: -80px; width: 160px; height: 120px;
+  -webkit-transform-origin: 0 0; transform-origin: 0 0;
+  -webkit-transform: scale(10.625, 10.834); transform: scale(10.625, 10.834);
+  opacity: 0; transition: opacity .25s linear; will-change: opacity, transform;
+}
+.glow.on { opacity: 1; }
+
+#page {
+  position: absolute; top: 0; left: 0; width: 1920px;
+  transition: transform .25s ease-out; will-change: transform;
+}
+
+/* Marco de foco único: pintado una sola vez y movido con transform (sin repintar). */
+#ring {
+  position: absolute; top: 0; left: 0; width: 352px; height: 207px; z-index: 4;
+  border: 4px solid #fff; border-radius: 30px;
+  box-shadow: 0 18px 36px rgba(0,0,0,.45);
+  transition: transform .12s ease-out; will-change: transform;
+  pointer-events: none;
+}
+#ring.hide { opacity: 0; }
+
+/* Cabecera */
+#top { height: 330px; padding: 84px 120px 0; position: relative; }
+#greeting { font-size: 21px; font-weight: 600; letter-spacing: 5px; color: rgba(255,255,255,.78); }
+#timeline { margin-top: 14px; white-space: nowrap; }
+#timeline > span, #weather > span { vertical-align: middle; }
+#time { font-size: 84px; font-weight: 300; letter-spacing: -2px; }
+.divider {
+  display: inline-block; width: 2px; height: 46px; margin: 0 30px 0 34px;
+  background: rgba(255,255,255,.35);
+}
+#date, #w-text { font-size: 24px; font-weight: 500; letter-spacing: 5px; color: rgba(255,255,255,.85); }
+#weather { display: none; }
+#weather.on { display: inline; }
+#w-icon { display: inline-block; width: 46px; height: 46px; margin-right: 14px; }
+#w-icon svg { width: 46px; height: 46px; }
+#w-temp { font-size: 46px; font-weight: 300; margin-right: 18px; }
+
+#pills { position: absolute; top: 110px; right: 120px; white-space: nowrap; }
+.pill {
+  display: inline-block; margin-left: 16px; padding: 14px 30px; border-radius: 40px;
+  font-size: 22px; font-weight: 500; color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.10); border: 1.5px solid rgba(255,255,255,.22);
+}
+.pill.focus { background: #fff; color: #111; }
+
+#appname { contain: strict; height: 260px; padding: 150px 150px 0; font-size: 76px; font-weight: 500; letter-spacing: -1px; }
+#page.scrolled #top, #page.scrolled #appname { visibility: hidden; }
+
+/* Filas */
+.row { padding: 0 122px; height: 262px; white-space: nowrap; }
+.row.dock { padding: 0 104px; height: 290px; }
+.tray {
+  display: inline-block; padding: 18px; border-radius: 40px;
+  background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.10);
+}
+
+.tile {
+  display: inline-block; vertical-align: top; position: relative;
+  width: 318px; height: 184px; margin-right: 24px; border-radius: 26px;
+  transition: transform .12s ease-out; will-change: transform;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+}
+.tile:last-child { margin-right: 0; }
+.tile img { position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); transform: translate(-50%,-50%); }
+.tile b {
+  position: absolute; top: 0; left: 0; width: 100%; line-height: 184px; text-align: center;
+  font-size: 36px; font-weight: 700; letter-spacing: -.5px;
+}
+.tile.focus { -webkit-transform: scale(1.08); transform: scale(1.08); z-index: 3; }
+
+#msg { position: absolute; bottom: 30px; left: 120px; font-size: 22px; color: #ff8a8a; }
+
+/* Entradas de vídeo (TV / HDMI): tarjeta oscura con icono y etiqueta, mismo tamaño que las demás. */
+.tile.input { background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); }
+.tile.input .in-ico { position: absolute; top: 40px; left: 0; width: 100%; text-align: center; }
+.tile.input .in-ico svg { width: 58px; height: 58px; }
+.tile.input .in-lbl { position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center;
+  font-size: 26px; font-weight: 600; color: rgba(255,255,255,.9); }
+
+/* Día: un azul noche un poco más claro (sutil, mantiene la estética oscura). */
+body.day { background: #0e1120; }
+
+/* Entrada no conectada: atenuada pero seleccionable (como el menú de fuentes de Samsung). */
+.tile.input.off .in-ico, .tile.input.off .in-lbl { opacity: .4; }
+
+/* Tiempo más completo: máx/mín del día y tira de próximas horas. */
+#w-hilo { margin-left: 20px; font-size: 22px; font-weight: 500; letter-spacing: 2px; color: rgba(255,255,255,.55); }
+#hourly { margin-top: 30px; height: 100px; white-space: nowrap; }
+.hr { display: inline-block; vertical-align: top; width: 104px; text-align: center; }
+.hr .h { font-size: 20px; letter-spacing: 2px; color: rgba(255,255,255,.5); }
+.hr svg { width: 36px; height: 36px; margin: 6px auto; display: block; }
+.hr .t { font-size: 24px; font-weight: 500; color: rgba(255,255,255,.9); }

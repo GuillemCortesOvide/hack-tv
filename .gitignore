@@ -1,0 +1,27 @@
+# Datos propios y artefactos: nunca publicar
+launcher/config.js
+.env
+.env.*
+!.env.example
+.tv_token
+Otros/
+build/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+*.wgt
+*.zip
+*.tar
+*.gz
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.crt
+profiles.xml
+*.backup
+launcher/apps.js
